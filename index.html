@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IBT - 即時排行榜</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; color: #fff; padding: 20px; margin: 0; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { color: #e94560; font-size: 32px; text-transform: uppercase; letter-spacing: 2px; }
+    .leaderboard { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+    .card { background: #16213e; border-radius: 10px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-left: 5px solid #e94560; transition: transform 0.2s; }
+    .card:hover { transform: scale(1.02); }
+    .rank-group { display: flex; align-items: center; gap: 15px; }
+    .rank { font-size: 24px; font-weight: bold; color: #0f3460; background: #fff; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+    .group-name { font-size: 20px; font-weight: bold; }
+    .scores { text-align: right; width: 65%; }
+    .total { font-size: 24px; font-weight: bold; color: #e94560; margin-bottom: 5px; }
+    .details { font-size: 13px; color: #a2a2a2; line-height: 1.6; }
+    .highlight { color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🏆 IBT 即時戰況排名 🏆</h1>
+    <p>數據即時同步中...</p>
+  </div>
+  
+  <div class="leaderboard" id="leaderboard">
+    <!-- 排名資料會透過 JavaScript 動態載入這裡 -->
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA7W4Q_-gD6---wDUTrD8YdBtOATOZGbbM",
+      authDomain: "ibtmaingame.firebaseapp.com",
+      databaseURL: "https://ibtmaingame-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "ibtmaingame",
+      storageBucket: "ibtmaingame.firebasestorage.app",
+      messagingSenderId: "1035805706833",
+      appId: "1:1035805706833:web:db8095540cdfb7b2ab8670",
+      measurementId: "G-9DQV12HBJ8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dbRef = ref(db, 'classes');
+
+    onValue(dbRef, (snapshot) => {
+      const data = snapshot.val();
+      if (!data) return;
+
+      const classesArray = Object.keys(data).map(key => {
+        const stats = data[key];
+        // 抓取 8 個分數，若無資料則預設為 0
+        const lang = stats.score_lang || 0;
+        const sci = stats.score_sci || 0;
+        const math = stats.score_math || 0;
+        const hisgeo = stats.score_hisgeo || 0;
+        const econ = stats.score_econ || 0;
+        const love = stats.score_love || 0;
+        const behavior = stats.score_behavior || 0;
+        const sport = stats.score_sport || 0;
+
+        // 加總成總積分
+        const total = lang + sci + math + hisgeo + econ + love + behavior + sport;
+        
+        return { 
+          id: key, 
+          name: `Class ${key.replace('class', '')}`,
+          scores: { lang, sci, math, hisgeo, econ, love, behavior, sport },
+          total: total
+        };
+      });
+
+      classesArray.sort((a, b) => b.total - a.total);
+
+      const board = document.getElementById('leaderboard');
+      board.innerHTML = ''; 
+
+      classesArray.forEach((cls, index) => {
+        const s = cls.scores;
+        let rankColor = '#fff';
+        if (index === 0) rankColor = '#ffd700'; 
+        if (index === 1) rankColor = '#c0c0c0'; 
+        if (index === 2) rankColor = '#cd7f32'; 
+
+        board.innerHTML += `
+          <div class="card">
+            <div class="rank-group">
+              <div class="rank" style="background-color: ${rankColor}">${index + 1}</div>
+              <div class="group-name">${cls.name}</div>
+            </div>
+            <div class="scores">
+              <div class="total">總積分: ${cls.total}</div>
+              <div class="details">
+                📚 成績：<span class="highlight">語文 ${s.lang} | 科學 ${s.sci} | 數學 ${s.math} | 史地 ${s.hisgeo} | 經濟 ${s.econ}</span><br>
+                🌟 日常：<span class="highlight">戀愛 ${s.love} | 品行 ${s.behavior} | 體育 ${s.sport}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    });
+  </script>
+</body>
+</html>

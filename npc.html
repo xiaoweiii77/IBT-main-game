@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NPC 評分控制台</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; margin: 0; }
+    .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #333; font-size: 24px; }
+    .section { border: 2px solid #e0e4e8; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+    .section h2 { margin-top: 0; font-size: 18px; color: #0056b3; }
+    label { display: block; margin: 10px 0 5px; font-weight: bold; color: #555; }
+    select, input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+    button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+    .btn-update { background-color: #28a745; margin-top: 5px; }
+    .btn-update:hover { background-color: #218838; }
+    .score-row { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; }
+    .score-label { font-size: 16px; font-weight: bold; color: #333; }
+    .btn-group { display: flex; gap: 10px; }
+    .btn-group button { width: 45px; height: 45px; padding: 0; font-size: 24px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+    .btn-plus { background-color: #28a745; }
+    .btn-plus:hover { background-color: #218838; }
+    .btn-minus { background-color: #dc3545; }
+    .btn-minus:hover { background-color: #c82333; }
+    #statusMsg { text-align: center; height: 20px; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 IBT NPC 控制台</h1>
+    
+    <label for="classSelect">📍 選擇要操作的班級：</label>
+    <select id="classSelect">
+      <option value="classA">Class A</option>
+      <option value="classB">Class B</option>
+      <option value="classC">Class C</option>
+      <option value="classD">Class D</option>
+      <option value="classE">Class E</option>
+      <option value="classF">Class F</option>
+      <option value="classG">Class G</option>
+      <option value="classH">Class H</option>
+      <option value="classI">Class I</option>
+      <option value="classJ">Class J</option>
+      <option value="classK">Class K</option>
+      <option value="classL">Class L</option>
+    </select>
+
+    <!-- 模式一：考試成績 (五科獨立，保留最高分) -->
+    <div class="section">
+      <h2>📝 考試成績 (自動保留該科最高分)</h2>
+      <label>選擇考試科目：</label>
+      <select id="subjectSelect">
+        <option value="score_lang">語文</option>
+        <option value="score_sci">科學</option>
+        <option value="score_math">數學</option>
+        <option value="score_hisgeo">歷史地理</option>
+        <option value="score_econ">經濟</option>
+      </select>
+      <label>輸入本次考試分數：</label>
+      <input type="number" id="studyScore" placeholder="例如：20">
+      <button id="btnStudy" class="btn-update">刷新該科紀錄</button>
+    </div>
+
+    <!-- 模式二：日常積分 (快速加減) -->
+    <div class="section">
+      <h2>🌟 日常積分 (快速加減)</h2>
+      <div id="statusMsg"></div>
+
+      <div class="score-row">
+        <div class="score-label">💖 戀愛積分</div>
+        <div class="btn-group">
+          <button class="btn-minus" data-attr="score_love" data-name="戀愛" data-val="-1">-</button>
+          <button class="btn-plus" data-attr="score_love" data-name="戀愛" data-val="1">+</button>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <div class="score-label">⭐ 品行積分</div>
+        <div class="btn-group">
+          <button class="btn-minus" data-attr="score_behavior" data-name="品行" data-val="-1">-</button>
+          <button class="btn-plus" data-attr="score_behavior" data-name="品行" data-val="1">+</button>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <div class="score-label">🏃 體育積分</div>
+        <div class="btn-group">
+          <button class="btn-minus" data-attr="score_sport" data-name="體育" data-val="-1">-</button>
+          <button class="btn-plus" data-attr="score_sport" data-name="體育" data-val="1">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getDatabase, ref, get, update, increment } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA7W4Q_-gD6---wDUTrD8YdBtOATOZGbbM",
+      authDomain: "ibtmaingame.firebaseapp.com",
+      databaseURL: "https://ibtmaingame-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "ibtmaingame",
+      storageBucket: "ibtmaingame.firebasestorage.app",
+      messagingSenderId: "1035805706833",
+      appId: "1:1035805706833:web:db8095540cdfb7b2ab8670",
+      measurementId: "G-9DQV12HBJ8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // 處理 5 科考試成績 (保留該科最高分)
+    document.getElementById('btnStudy').addEventListener('click', async () => {
+      const classId = document.getElementById('classSelect').value;
+      const subjectAttr = document.getElementById('subjectSelect').value;
+      const subjectName = document.getElementById('subjectSelect').options[document.getElementById('subjectSelect').selectedIndex].text;
+      const scoreInput = document.getElementById('studyScore').value;
+      
+      if (!scoreInput) return alert('請輸入分數！');
+      const newScore = parseInt(scoreInput);
+      const classRef = ref(db, 'classes/' + classId);
+      
+      try {
+        const snapshot = await get(classRef);
+        if (snapshot.exists()) {
+          const currentScore = snapshot.val()[subjectAttr] || 0;
+          if (newScore > currentScore) {
+            const updates = {};
+            updates[subjectAttr] = newScore;
+            await update(classRef, updates);
+            const displayName = classId.replace('class', 'Class ');
+            alert(`${displayName} 的【${subjectName}】成績已刷新！最高分為：${newScore}`);
+            document.getElementById('studyScore').value = ''; 
+          } else {
+            alert(`未更新：本次【${subjectName}】分數 (${newScore}) 沒有超越歷史最高分 (${currentScore})`);
+          }
+        }
+      } catch (error) {
+        console.error("更新失敗", error);
+        alert('系統錯誤，請重試');
+      }
+    });
+
+    // 處理日常積分 (快速加減)
+    const quickButtons = document.querySelectorAll('.btn-plus, .btn-minus');
+    const statusMsg = document.getElementById('statusMsg');
+    let statusTimeout; 
+
+    quickButtons.forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const classId = document.getElementById('classSelect').value;
+        const attribute = e.target.getAttribute('data-attr');
+        const attrName = e.target.getAttribute('data-name');
+        const amount = parseInt(e.target.getAttribute('data-val'));
+        
+        const classRef = ref(db, 'classes/' + classId);
+        const updates = {};
+        updates[attribute] = increment(amount);
+        
+        try {
+          await update(classRef, updates);
+          const displayName = classId.replace('class', 'Class ');
+          const actionText = amount > 0 ? '+1' : '-1';
+          statusMsg.innerText = `✅ ${displayName} 的 ${attrName} 已 ${actionText}`;
+          statusMsg.style.color = amount > 0 ? '#28a745' : '#dc3545';
+          
+          clearTimeout(statusTimeout);
+          statusTimeout = setTimeout(() => { statusMsg.innerText = ''; }, 2000);
+          
+        } catch (error) {
+          console.error("更新失敗", error);
+          alert('連線失敗，請重試');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
