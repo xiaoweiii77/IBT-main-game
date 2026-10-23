@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NPC 評分控制台</title>
+  <title>IBT NPC 控制台</title>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; margin: 0; }
     .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -16,9 +16,9 @@
     button:hover { background-color: #0056b3; }
     .btn-update { background-color: #28a745; margin-top: 5px; }
     .btn-update:hover { background-color: #218838; }
-    .score-row { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; }
-    .score-label { font-size: 16px; font-weight: bold; color: #333; }
-    .btn-group { display: flex; gap: 10px; }
+    .score-row { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; flex-wrap: wrap; gap: 10px; }
+    .score-label { font-size: 16px; font-weight: bold; color: #333; display: flex; align-items: center; gap: 10px; }
+    .btn-group { display: flex; gap: 10px; margin-left: auto; }
     .btn-group button { width: 45px; height: 45px; padding: 0; font-size: 24px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
     .btn-plus { background-color: #28a745; }
     .btn-plus:hover { background-color: #218838; }
@@ -47,7 +47,7 @@
       <option value="classL">Class L (Green 绿色)</option>
     </select>
 
-    <!-- 模式一：考試成績 (五科獨立，保留最高分) -->
+    <!-- 模式一：考試成績 -->
     <div class="section">
       <h2>📝 考試成績 (自動保留該科最高分)</h2>
       <label>選擇考試科目：</label>
@@ -63,16 +63,29 @@
       <button id="btnStudy" class="btn-update">刷新該科紀錄</button>
     </div>
 
-    <!-- 模式二：日常積分 (快速加減) -->
+    <!-- 模式二：日常積分 -->
     <div class="section">
       <h2>🌟 日常積分 (快速加減)</h2>
       <div id="statusMsg"></div>
 
+      <!-- 戀愛積分 (支援選擇特定 NPC) -->
       <div class="score-row">
-        <div class="score-label">💖 戀愛積分</div>
+        <div class="score-label">
+          💖 對
+          <select id="npcLoveSelect" style="margin-bottom: 0; width: auto; padding: 6px;">
+            <option value="love_jiyinyin">肌音音</option>
+            <option value="love_yehuimei">叶惠美</option>
+            <option value="love_baizhaotang">白昭棠</option>
+            <option value="love_luofumeng">罗浮梦</option>
+            <option value="love_liujinxiu">刘锦秀</option>
+            <option value="love_ouyangruoxi">欧阳若曦</option>
+          </select>
+          的好感
+        </div>
         <div class="btn-group">
-          <button class="btn-minus" data-attr="score_love" data-name="戀愛" data-val="-1">-</button>
-          <button class="btn-plus" data-attr="score_love" data-name="戀愛" data-val="1">+</button>
+          <!-- data-attr 設為 dynamic_love，由 JS 動態抓取選單值 -->
+          <button class="btn-minus" data-attr="dynamic_love" data-val="-1">-</button>
+          <button class="btn-plus" data-attr="dynamic_love" data-val="1">+</button>
         </div>
       </div>
 
@@ -112,7 +125,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // 處理 5 科考試成績 (保留該科最高分)
+    // 處理 5 科考試成績
     document.getElementById('btnStudy').addEventListener('click', async () => {
       const classId = document.getElementById('classSelect').value;
       const subjectAttr = document.getElementById('subjectSelect').value;
@@ -131,7 +144,8 @@
             const updates = {};
             updates[subjectAttr] = newScore;
             await update(classRef, updates);
-            const displayName = classId.replace('class', 'Class ');
+            const classSelectElem = document.getElementById('classSelect');
+            const displayName = classSelectElem.options[classSelectElem.selectedIndex].text;
             alert(`${displayName} 的【${subjectName}】成績已刷新！最高分為：${newScore}`);
             document.getElementById('studyScore').value = ''; 
           } else {
@@ -144,17 +158,27 @@
       }
     });
 
-    // 處理日常積分 (快速加減)
+    // 處理日常積分與動態 NPC 戀愛好感度
     const quickButtons = document.querySelectorAll('.btn-plus, .btn-minus');
     const statusMsg = document.getElementById('statusMsg');
     let statusTimeout; 
 
     quickButtons.forEach(btn => {
       btn.addEventListener('click', async (e) => {
-        const classId = document.getElementById('classSelect').value;
-        const attribute = e.target.getAttribute('data-attr');
-        const attrName = e.target.getAttribute('data-name');
+        const classSelectElem = document.getElementById('classSelect');
+        const classId = classSelectElem.value;
+        const displayName = classSelectElem.options[classSelectElem.selectedIndex].text;
+        
+        let attribute = e.target.getAttribute('data-attr');
+        let attrName = e.target.getAttribute('data-name');
         const amount = parseInt(e.target.getAttribute('data-val'));
+        
+        // 如果是動態的戀愛積分，去抓取下拉選單的值
+        if (attribute === 'dynamic_love') {
+          const loveSelect = document.getElementById('npcLoveSelect');
+          attribute = loveSelect.value;
+          attrName = `對 ${loveSelect.options[loveSelect.selectedIndex].text} 的好感度`;
+        }
         
         const classRef = ref(db, 'classes/' + classId);
         const updates = {};
@@ -162,9 +186,8 @@
         
         try {
           await update(classRef, updates);
-          const displayName = classId.replace('class', 'Class ');
           const actionText = amount > 0 ? '+1' : '-1';
-          statusMsg.innerText = `✅ ${displayName} 的 ${attrName} 已 ${actionText}`;
+          statusMsg.innerText = `✅ ${displayName} ${attrName} 已 ${actionText}`;
           statusMsg.style.color = amount > 0 ? '#28a745' : '#dc3545';
           
           clearTimeout(statusTimeout);

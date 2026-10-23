@@ -14,10 +14,11 @@
     .rank-group { display: flex; align-items: center; gap: 15px; }
     .rank { font-size: 24px; font-weight: bold; color: #0f3460; background: #fff; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
     .group-name { font-size: 20px; font-weight: bold; }
-    .scores { text-align: right; width: 65%; }
+    .scores { text-align: right; width: 75%; }
     .total { font-size: 24px; font-weight: bold; color: #e94560; margin-bottom: 5px; }
     .details { font-size: 13px; color: #a2a2a2; line-height: 1.6; }
     .highlight { color: #fff; }
+    .love-details { font-size: 11px; color: #ffb6c1; margin-top: 3px; }
   </style>
 </head>
 <body>
@@ -55,23 +56,34 @@
 
       const classesArray = Object.keys(data).map(key => {
         const stats = data[key];
-        // 抓取 8 個分數，若無資料則預設為 0
+        
+        // 抓取基礎分數
         const lang = stats.score_lang || 0;
         const sci = stats.score_sci || 0;
         const math = stats.score_math || 0;
         const hisgeo = stats.score_hisgeo || 0;
         const econ = stats.score_econ || 0;
-        const love = stats.score_love || 0;
         const behavior = stats.score_behavior || 0;
         const sport = stats.score_sport || 0;
-
-        // 加總成總積分
-        const total = lang + sci + math + hisgeo + econ + love + behavior + sport;
+        
+        // 抓取 6 位 NPC 戀愛分數
+        const jiyinyin = stats.love_jiyinyin || 0;
+        const yehuimei = stats.love_yehuimei || 0;
+        const baizhaotang = stats.love_baizhaotang || 0;
+        const luofumeng = stats.love_luofumeng || 0;
+        const liujinxiu = stats.love_liujinxiu || 0;
+        const ouyangruoxi = stats.love_ouyangruoxi || 0;
+        
+        const loveTotal = jiyinyin + yehuimei + baizhaotang + luofumeng + liujinxiu + ouyangruoxi;
+        
+        // 總積分
+        const total = lang + sci + math + hisgeo + econ + behavior + sport + loveTotal;
         
         return { 
           id: key, 
           name: `Class ${key.replace('class', '')}`,
-          scores: { lang, sci, math, hisgeo, econ, love, behavior, sport },
+          scores: { lang, sci, math, hisgeo, econ, behavior, sport },
+          loves: { jiyinyin, yehuimei, baizhaotang, luofumeng, liujinxiu, ouyangruoxi, loveTotal },
           total: total
         };
       });
@@ -83,6 +95,7 @@
 
       classesArray.forEach((cls, index) => {
         const s = cls.scores;
+        const l = cls.loves;
         let rankColor = '#fff';
         if (index === 0) rankColor = '#ffd700'; 
         if (index === 1) rankColor = '#c0c0c0'; 
@@ -98,7 +111,10 @@
               <div class="total">總積分: ${cls.total}</div>
               <div class="details">
                 📚 成績：<span class="highlight">語文 ${s.lang} | 科學 ${s.sci} | 數學 ${s.math} | 史地 ${s.hisgeo} | 經濟 ${s.econ}</span><br>
-                🌟 日常：<span class="highlight">戀愛 ${s.love} | 品行 ${s.behavior} | 體育 ${s.sport}</span>
+                🌟 日常：<span class="highlight">品行 ${s.behavior} | 體育 ${s.sport} | 💖戀愛總分 ${l.loveTotal}</span>
+              </div>
+              <div class="love-details">
+                ( 肌音音: ${l.jiyinyin} | 叶惠美: ${l.yehuimei} | 白昭棠: ${l.baizhaotang} | 罗浮梦: ${l.luofumeng} | 刘锦秀: ${l.liujinxiu} | 欧阳若曦: ${l.ouyangruoxi} )
               </div>
             </div>
           </div>
