@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>拍賣管理後台 - IBT</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background-color: #2c3e50; color: white; padding: 20px; }
+    .container { max-width: 500px; margin: 0 auto; background: #34495e; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    h1 { text-align: center; color: #f1c40f; }
+    label { display: block; margin: 15px 0 5px; font-weight: bold; }
+    input, select { width: 100%; padding: 10px; border-radius: 6px; border: none; box-sizing: border-box; font-size: 16px; margin-bottom: 10px; }
+    button { width: 100%; padding: 12px; font-size: 18px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+    .btn-start { background-color: #e74c3c; color: white; }
+    .btn-start:hover { background-color: #c0392b; }
+    .btn-notice { background-color: #3498db; color: white; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔨 拍賣管理控制台</h1>
+
+    <!-- 預告下一場拍賣 -->
+    <div style="border-bottom: 1px solid #7f8c8d; padding-bottom: 20px;">
+      <label>發佈下一場拍賣預告：</label>
+      <input type="text" id="nextMsg" placeholder="例如：下一場將於 20:30 開始">
+      <button class="btn-notice" id="btnNotice">廣播預告訊息</button>
+    </div>
+
+    <!-- 啟動拍賣 -->
+    <div style="padding-top: 10px;">
+      <label>拍賣物品名稱：</label>
+      <input type="text" id="itemName" placeholder="例如：告白信封 A">
+      
+      <label>拍賣時長 (秒)：</label>
+      <input type="number" id="duration" placeholder="例如：60" value="60">
+      
+      <button class="btn-start" id="btnStart">🚀 立即開始拍賣！</button>
+      <button style="background: #95a5a6;" id="btnReset">強制結束 / 重置拍賣</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA7W4Q_-gD6---wDUTrD8YdBtOATOZGbbM",
+      authDomain: "ibtmaingame.firebaseapp.com",
+      databaseURL: "https://ibtmaingame-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "ibtmaingame",
+      storageBucket: "ibtmaingame.firebasestorage.app",
+      messagingSenderId: "1035805706833",
+      appId: "1:1035805706833:web:db8095540cdfb7b2ab8670"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auctionRef = ref(db, 'auction');
+
+    // 廣播預告
+    document.getElementById('btnNotice').addEventListener('click', async () => {
+      const msg = document.getElementById('nextMsg').value;
+      await update(auctionRef, { nextAuctionMsg: msg });
+      alert("預告已發佈給所有人！");
+    });
+
+    // 開始拍賣
+    document.getElementById('btnStart').addEventListener('click', async () => {
+      const itemName = document.getElementById('itemName').value;
+      const durationSec = parseInt(document.getElementById('duration').value);
+      if (!itemName || !durationSec) return alert("請填寫物品名稱與秒數");
+
+      // 計算未來的結束時間 (目前時間 + 秒數)
+      const endTime = Date.now() + (durationSec * 1000);
+
+      await update(auctionRef, {
+        status: "active",
+        itemName: itemName,
+        endTime: endTime,
+        highestBid: 0,
+        highestBidder: "無"
+      });
+      alert(`拍賣開始！倒數 ${durationSec} 秒`);
+    });
+
+    // 強制重置
+    document.getElementById('btnReset').addEventListener('click', async () => {
+      await update(auctionRef, { status: "standby", itemName: "拍賣已結束", endTime: 0 });
+      alert("拍賣已強制結束/重置");
+    });
+  </script>
+</body>
+</html>
