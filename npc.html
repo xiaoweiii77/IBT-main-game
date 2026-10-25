@@ -16,10 +16,13 @@
     button:hover { background-color: #0056b3; }
     .btn-update { background-color: #28a745; margin-top: 5px; }
     .btn-update:hover { background-color: #218838; }
-    .score-row { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; flex-wrap: wrap; gap: 10px; }
-    .score-label { font-size: 16px; font-weight: bold; color: #333; display: flex; align-items: center; gap: 10px; }
-    .btn-group { display: flex; gap: 10px; margin-left: auto; }
-    .btn-group button { width: 45px; height: 45px; padding: 0; font-size: 24px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+    
+    /* 優化排版：讓標題在上，6個按鈕在下，完美適應手機螢幕 */
+    .score-row { display: flex; flex-direction: column; background: #f8f9fa; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #ddd; gap: 10px; }
+    .score-label { font-size: 16px; font-weight: bold; color: #333; display: flex; align-items: center; gap: 10px; justify-content: center; }
+    .btn-group { display: flex; gap: 5px; width: 100%; }
+    .btn-group button { flex: 1; height: 45px; padding: 0; font-size: 15px; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+    
     .btn-plus { background-color: #28a745; }
     .btn-plus:hover { background-color: #218838; }
     .btn-minus { background-color: #dc3545; }
@@ -68,11 +71,11 @@
       <h2>🌟 日常積分 (快速加減)</h2>
       <div id="statusMsg"></div>
 
-      <!-- 戀愛積分 (支援選擇特定 NPC) -->
+      <!-- 戀愛積分 -->
       <div class="score-row">
         <div class="score-label">
           💖 對
-          <select id="npcLoveSelect" style="margin-bottom: 0; width: auto; padding: 6px;">
+          <select id="npcLoveSelect" style="margin-bottom: 0; width: auto; padding: 4px; font-size: 15px;">
             <option value="love_jiyinyin">肌音音</option>
             <option value="love_yehuimei">叶惠美</option>
             <option value="love_baizhaotang">白昭棠</option>
@@ -83,25 +86,38 @@
           的好感
         </div>
         <div class="btn-group">
-          <!-- data-attr 設為 dynamic_love，由 JS 動態抓取選單值 -->
-          <button class="btn-minus" data-attr="dynamic_love" data-val="-1">-</button>
-          <button class="btn-plus" data-attr="dynamic_love" data-val="1">+</button>
+          <button class="btn-minus" data-attr="dynamic_love" data-val="-10">-10</button>
+          <button class="btn-minus" data-attr="dynamic_love" data-val="-5">-5</button>
+          <button class="btn-minus" data-attr="dynamic_love" data-val="-1">-1</button>
+          <button class="btn-plus" data-attr="dynamic_love" data-val="1">+1</button>
+          <button class="btn-plus" data-attr="dynamic_love" data-val="5">+5</button>
+          <button class="btn-plus" data-attr="dynamic_love" data-val="10">+10</button>
         </div>
       </div>
 
+      <!-- 品行積分 -->
       <div class="score-row">
         <div class="score-label">⭐ 品行積分</div>
         <div class="btn-group">
-          <button class="btn-minus" data-attr="score_behavior" data-name="品行" data-val="-1">-</button>
-          <button class="btn-plus" data-attr="score_behavior" data-name="品行" data-val="1">+</button>
+          <button class="btn-minus" data-attr="score_behavior" data-name="品行" data-val="-10">-10</button>
+          <button class="btn-minus" data-attr="score_behavior" data-name="品行" data-val="-5">-5</button>
+          <button class="btn-minus" data-attr="score_behavior" data-name="品行" data-val="-1">-1</button>
+          <button class="btn-plus" data-attr="score_behavior" data-name="品行" data-val="1">+1</button>
+          <button class="btn-plus" data-attr="score_behavior" data-name="品行" data-val="5">+5</button>
+          <button class="btn-plus" data-attr="score_behavior" data-name="品行" data-val="10">+10</button>
         </div>
       </div>
 
+      <!-- 體育積分 -->
       <div class="score-row">
         <div class="score-label">🏃 體育積分</div>
         <div class="btn-group">
-          <button class="btn-minus" data-attr="score_sport" data-name="體育" data-val="-1">-</button>
-          <button class="btn-plus" data-attr="score_sport" data-name="體育" data-val="1">+</button>
+          <button class="btn-minus" data-attr="score_sport" data-name="體育" data-val="-10">-10</button>
+          <button class="btn-minus" data-attr="score_sport" data-name="體育" data-val="-5">-5</button>
+          <button class="btn-minus" data-attr="score_sport" data-name="體育" data-val="-1">-1</button>
+          <button class="btn-plus" data-attr="score_sport" data-name="體育" data-val="1">+1</button>
+          <button class="btn-plus" data-attr="score_sport" data-name="體育" data-val="5">+5</button>
+          <button class="btn-plus" data-attr="score_sport" data-name="體育" data-val="10">+10</button>
         </div>
       </div>
     </div>
@@ -125,7 +141,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // 處理 5 科考試成績
     document.getElementById('btnStudy').addEventListener('click', async () => {
       const classId = document.getElementById('classSelect').value;
       const subjectAttr = document.getElementById('subjectSelect').value;
@@ -145,7 +160,7 @@
             updates[subjectAttr] = newScore;
             await update(classRef, updates);
             const classSelectElem = document.getElementById('classSelect');
-            const displayName = classSelectElem.options[classSelectElem.selectedIndex].text;
+            const displayName = classSelectElem.options[classSelectElem.selectedIndex].text.split(' (')[0];
             alert(`${displayName} 的【${subjectName}】成績已刷新！最高分為：${newScore}`);
             document.getElementById('studyScore').value = ''; 
           } else {
@@ -158,7 +173,6 @@
       }
     });
 
-    // 處理日常積分與動態 NPC 戀愛好感度
     const quickButtons = document.querySelectorAll('.btn-plus, .btn-minus');
     const statusMsg = document.getElementById('statusMsg');
     let statusTimeout; 
@@ -167,13 +181,12 @@
       btn.addEventListener('click', async (e) => {
         const classSelectElem = document.getElementById('classSelect');
         const classId = classSelectElem.value;
-        const displayName = classSelectElem.options[classSelectElem.selectedIndex].text;
+        const displayName = classSelectElem.options[classSelectElem.selectedIndex].text.split(' (')[0];
         
         let attribute = e.target.getAttribute('data-attr');
         let attrName = e.target.getAttribute('data-name');
         const amount = parseInt(e.target.getAttribute('data-val'));
         
-        // 如果是動態的戀愛積分，去抓取下拉選單的值
         if (attribute === 'dynamic_love') {
           const loveSelect = document.getElementById('npcLoveSelect');
           attribute = loveSelect.value;
@@ -186,7 +199,7 @@
         
         try {
           await update(classRef, updates);
-          const actionText = amount > 0 ? '+1' : '-1';
+          const actionText = amount > 0 ? `+${amount}` : `${amount}`;
           statusMsg.innerText = `✅ ${displayName} ${attrName} 已 ${actionText}`;
           statusMsg.style.color = amount > 0 ? '#28a745' : '#dc3545';
           
