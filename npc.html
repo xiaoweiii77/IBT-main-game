@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+<script>
+    const pass = prompt("🔒 身份验证：请输入工作人员密码");
+    if (pass !== "IBT888") {
+      document.documentElement.innerHTML = "<h1 style='color:red; text-align:center; margin-top:50px;'>❌ 密码错误，拒绝存取！</h1>";
+      throw new Error("密码错误，停止载入系统");
+    }
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IBT NPC 控制台</title>
