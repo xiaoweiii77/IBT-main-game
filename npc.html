@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+<script>
+    // 在网页载入任何画面和 Firebase 之前，先拦截检查密码
+    const pass = prompt("🔒 身份验证：请输入工作人员密码");
+    
+    // 你可以在这里设定你的专属密码，例如设定为 "IBT888"
+    if (pass !== "IBT888") {
+      // 如果密码错误，直接把整个网页清空，显示拒绝存取
+      document.documentElement.innerHTML = "<h1 style='color:red; text-align:center; margin-top:50px;'>❌ 密码错误，拒绝存取！</h1>";
+      // 停止执行后续所有的系统程式码
+      throw new Error("密码错误，停止载入系统");
+    }
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IBT 青春操作台</title>
