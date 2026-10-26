@@ -1,88 +1,216 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<script>
-    const pass = prompt("🔒 身份验证：请输入工作人员密码");
-    if (pass !== "IBT888") {
-      document.documentElement.innerHTML = "<h1 style='color:red; text-align:center; margin-top:50px;'>❌ 密码错误，拒绝存取！</h1>";
-      throw new Error("密码错误，停止载入系统");
-    }
-  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IBT NPC 控制台</title>
+  <title>IBT 青春操作台</title>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; margin: 0; }
-    .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    h1 { text-align: center; color: #333; font-size: 24px; }
-    .section { border: 2px solid #e0e4e8; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
-    .section h2 { margin-top: 0; font-size: 18px; color: #0056b3; }
-    label { display: block; margin: 10px 0 5px; font-weight: bold; color: #555; }
-    select, input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-    button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
-    button:hover { background-color: #0056b3; }
-    .btn-update { background-color: #28a745; margin-top: 5px; }
-    .btn-update:hover { background-color: #218838; }
+    :root {
+      /* 青春粉色主題色票 */
+      --primary: #ec4899;        /* 亮粉色 */
+      --primary-hover: #db2777;  /* 深粉色 */
+      --primary-light: #fce7f3;  /* 淺粉背景 */
+      --primary-border: #fbcfe8; /* 粉色邊框 */
+      
+      /* 按鈕馬卡龍色 */
+      --success-bg: #ecfdf5;
+      --success-border: #a7f3d0;
+      --success-text: #059669;
+      
+      --danger-bg: #fff1f2;
+      --danger-border: #fecdd3;
+      --danger-text: #e11d48;
+      
+      --bg-color: #fdf2f8;       /* 整體網頁極淺粉背景 */
+      --card-bg: #ffffff;
+      --text-main: #475569;      /* 柔和的深灰色字體 (不使用死黑) */
+    }
     
-    /* 優化排版：讓標題在上，6個按鈕在下，完美適應手機螢幕 */
-    .score-row { display: flex; flex-direction: column; background: #f8f9fa; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #ddd; gap: 10px; }
-    .score-label { font-size: 16px; font-weight: bold; color: #333; display: flex; align-items: center; gap: 10px; justify-content: center; }
-    .btn-group { display: flex; gap: 5px; width: 100%; }
-    .btn-group button { flex: 1; height: 45px; padding: 0; font-size: 15px; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+    body { 
+      font-family: 'Segoe UI', 'Nunito', system-ui, sans-serif; 
+      background-color: var(--bg-color); 
+      color: var(--text-main); 
+      padding: 15px; 
+      margin: 0; 
+      background-image: radial-gradient(#fbcfe8 1px, transparent 1px);
+      background-size: 20px 20px; /* 增加一點可愛的點陣背景 */
+    }
     
-    .btn-plus { background-color: #28a745; }
-    .btn-plus:hover { background-color: #218838; }
-    .btn-minus { background-color: #dc3545; }
-    .btn-minus:hover { background-color: #c82333; }
-    #statusMsg { text-align: center; height: 20px; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
+    .container { 
+      max-width: 550px; 
+      margin: 0 auto; 
+      background: var(--card-bg); 
+      padding: 25px; 
+      border-radius: 24px; /* 更圓潤的邊角 */
+      box-shadow: 0 10px 40px rgba(236, 72, 153, 0.08); /* 柔和的粉色陰影 */
+      border: 2px solid #fff;
+    }
+    
+    h1 { 
+      text-align: center; 
+      color: var(--primary); 
+      font-size: 28px; 
+      font-weight: 800; 
+      margin-top: 0; 
+      margin-bottom: 25px;
+      letter-spacing: 1px;
+    }
+    
+    .section { 
+      background: #ffffff; 
+      border: 2px solid var(--primary-light); 
+      border-radius: 20px; 
+      padding: 20px; 
+      margin-bottom: 25px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    }
+    
+    .section h2 { 
+      margin-top: 0; 
+      font-size: 18px; 
+      color: var(--primary-hover); 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      border-bottom: 2px dashed var(--primary-border); 
+      padding-bottom: 12px; 
+    }
+    
+    label { display: block; margin: 15px 0 8px; font-weight: 600; color: #64748b; font-size: 15px; }
+    
+    select, input { 
+      width: 100%; 
+      padding: 14px; 
+      border: 2px solid #e2e8f0; 
+      border-radius: 12px; 
+      box-sizing: border-box; 
+      font-size: 16px; 
+      background: #f8fafc; 
+      transition: all 0.3s ease; 
+      outline: none; 
+      color: #334155;
+    }
+    select:focus, input:focus { 
+      border-color: var(--primary); 
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.15); 
+    }
+    
+    button { padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+    button:active { transform: scale(0.95); }
+    
+    .btn-update { 
+      width: 100%; 
+      background: linear-gradient(135deg, #f472b6, #ec4899); /* 青春漸層粉 */
+      color: white;
+      margin-top: 15px; 
+      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3); 
+    }
+    .btn-update:hover { 
+      background: linear-gradient(135deg, #ec4899, #db2777); 
+      box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4); 
+    }
+    
+    .score-row { 
+      background: #fff; 
+      padding: 15px 0; 
+      margin-bottom: 5px; 
+      border-bottom: 1px dashed #f1f5f9;
+    }
+    .score-row:last-child { border-bottom: none; }
+    
+    .score-label { 
+      font-size: 16px; 
+      font-weight: 700; 
+      color: #475569; 
+      margin-bottom: 12px; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    
+    .btn-group { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; width: 100%; }
+    .btn-group button { height: 46px; padding: 0; font-size: 16px; border-radius: 10px; font-weight: 800; }
+    
+    /* 柔和的扣分按鈕 */
+    .btn-minus { background-color: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-border); }
+    .btn-minus:hover { background-color: #ffe4e6; border-color: #fda4af; }
+    
+    /* 柔和的加分按鈕 */
+    .btn-plus { background-color: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
+    .btn-plus:hover { background-color: #d1fae5; border-color: #6ee7b7; }
+    
+    #statusMsg { 
+      text-align: center; height: 24px; font-weight: bold; margin-bottom: 15px; font-size: 15px; 
+      background: #f0fdf4; color: #16a34a; border-radius: 10px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;
+    }
+    #statusMsg.show { opacity: 1; }
+    
+    /* 頂部選擇區特別裝飾 */
+    .top-selector {
+      background: var(--primary-light); 
+      padding: 18px; 
+      border-radius: 16px; 
+      margin-bottom: 25px; 
+      border: 1px solid var(--primary-border);
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎮 IBT NPC 控制台</h1>
+    <h1>🌸 IBT 青春操作台 🌸</h1>
     
-    <label for="classSelect">📍 選擇要操作的班級：</label>
-    <select id="classSelect">
-      <option value="classA">Class A (Red 红色)</option>
-      <option value="classB">Class B (Tiffany 浅蓝绿色)</option>
-      <option value="classC">Class C (Brown 棕色)</option>
-      <option value="classD">Class D (White 白色)</option>
-      <option value="classE">Class E (Yellow 黄色)</option>
-      <option value="classF">Class F (Black 黑色)</option>
-      <option value="classG">Class G (Grey 灰色)</option>
-      <option value="classH">Class H (Blue 蓝色)</option>
-      <option value="classI">Class I (Light Purple 浅紫色)</option>
-      <option value="classJ">Class J (Sky Blue 浅蓝色)</option>
-      <option value="classK">Class K (Neon Green 亮绿色)</option>
-      <option value="classL">Class L (Green 绿色)</option>
-    </select>
+    <!-- 頂部班級選擇 -->
+    <div class="top-selector">
+      <label style="margin-top: 0; color: var(--primary-hover);">📍 選擇要操作的班級：</label>
+      <select id="classSelect" style="border-color: var(--primary-border); background: #fff;">
+        <option value="classA">Class A (Red 红色)</option>
+        <option value="classB">Class B (Tiffany 浅蓝绿色)</option>
+        <option value="classC">Class C (Brown 棕色)</option>
+        <option value="classD">Class D (White 白色)</option>
+        <option value="classE">Class E (Yellow 黄色)</option>
+        <option value="classF">Class F (Black 黑色)</option>
+        <option value="classG">Class G (Grey 灰色)</option>
+        <option value="classH">Class H (Blue 蓝色)</option>
+        <option value="classI">Class I (Light Purple 浅紫色)</option>
+        <option value="classJ">Class J (Sky Blue 浅蓝色)</option>
+        <option value="classK">Class K (Neon Green 亮绿色)</option>
+        <option value="classL">Class L (Green 绿色)</option>
+      </select>
+    </div>
 
     <!-- 模式一：考試成績 -->
     <div class="section">
-      <h2>📝 考試成績 (自動保留該科最高分)</h2>
-      <label>選擇考試科目：</label>
-      <select id="subjectSelect">
-        <option value="score_lang">語文</option>
-        <option value="score_sci">科學</option>
-        <option value="score_math">數學</option>
-        <option value="score_hisgeo">歷史地理</option>
-        <option value="score_econ">經濟</option>
-      </select>
-      <label>輸入本次考試分數：</label>
-      <input type="number" id="studyScore" placeholder="例如：20">
-      <button id="btnStudy" class="btn-update">刷新該科紀錄</button>
+      <h2>📝 考試成績 <span style="font-size: 12px; font-weight: normal; color: #94a3b8; margin-left: auto;">(保留該科最高分)</span></h2>
+      <div style="display: flex; gap: 12px;">
+        <div style="flex: 1;">
+          <label>科目</label>
+          <select id="subjectSelect">
+            <option value="score_lang">語文</option>
+            <option value="score_sci">科學</option>
+            <option value="score_math">數學</option>
+            <option value="score_hisgeo">歷史地理</option>
+            <option value="score_econ">經濟</option>
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <label>分數</label>
+          <input type="number" id="studyScore" placeholder="輸入分數">
+        </div>
+      </div>
+      <button id="btnStudy" class="btn-update">✨ 刷新該科紀錄</button>
     </div>
 
     <!-- 模式二：日常積分 -->
     <div class="section">
-      <h2>🌟 日常積分 (快速加減)</h2>
+      <h2>🌟 日常積分 <span style="font-size: 12px; font-weight: normal; color: #94a3b8; margin-left: auto;">(快速點擊加減)</span></h2>
       <div id="statusMsg"></div>
 
       <!-- 戀愛積分 -->
       <div class="score-row">
         <div class="score-label">
-          💖 對
-          <select id="npcLoveSelect" style="margin-bottom: 0; width: auto; padding: 4px; font-size: 15px;">
+          💌 對
+          <select id="npcLoveSelect" style="margin: 0; width: auto; padding: 6px 12px; font-size: 14px; border-color: var(--primary-border); background: #fffafc; color: var(--primary-hover); border-radius: 8px;">
             <option value="love_jiyinyin">肌音音</option>
             <option value="love_yehuimei">叶惠美</option>
             <option value="love_baizhaotang">白昭棠</option>
@@ -116,7 +244,7 @@
       </div>
 
       <!-- 體育積分 -->
-      <div class="score-row">
+      <div class="score-row" style="border-bottom: none;">
         <div class="score-label">🏃 體育積分</div>
         <div class="btn-group">
           <button class="btn-minus" data-attr="score_sport" data-name="體育" data-val="-10">-10</button>
@@ -141,8 +269,7 @@
       projectId: "ibtmaingame",
       storageBucket: "ibtmaingame.firebasestorage.app",
       messagingSenderId: "1035805706833",
-      appId: "1:1035805706833:web:db8095540cdfb7b2ab8670",
-      measurementId: "G-9DQV12HBJ8"
+      appId: "1:1035805706833:web:db8095540cdfb7b2ab8670"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -154,7 +281,7 @@
       const subjectName = document.getElementById('subjectSelect').options[document.getElementById('subjectSelect').selectedIndex].text;
       const scoreInput = document.getElementById('studyScore').value;
       
-      if (!scoreInput) return alert('請輸入分數！');
+      if (!scoreInput) return alert('💭 哎呀，請輸入分數唷！');
       const newScore = parseInt(scoreInput);
       const classRef = ref(db, 'classes/' + classId);
       
@@ -168,15 +295,15 @@
             await update(classRef, updates);
             const classSelectElem = document.getElementById('classSelect');
             const displayName = classSelectElem.options[classSelectElem.selectedIndex].text.split(' (')[0];
-            alert(`${displayName} 的【${subjectName}】成績已刷新！最高分為：${newScore}`);
+            alert(`✨ 太棒了！${displayName} 的【${subjectName}】成績已刷新！最高分為：${newScore}`);
             document.getElementById('studyScore').value = ''; 
           } else {
-            alert(`未更新：本次【${subjectName}】分數 (${newScore}) 沒有超越歷史最高分 (${currentScore})`);
+            alert(`📝 紀錄未更新：本次【${subjectName}】分數 (${newScore}) 沒有超越歷史最高分 (${currentScore}) 喔！`);
           }
         }
       } catch (error) {
         console.error("更新失敗", error);
-        alert('系統錯誤，請重試');
+        alert('❌ 系統似乎打結了，請重試一下');
       }
     });
 
@@ -197,7 +324,7 @@
         if (attribute === 'dynamic_love') {
           const loveSelect = document.getElementById('npcLoveSelect');
           attribute = loveSelect.value;
-          attrName = `對 ${loveSelect.options[loveSelect.selectedIndex].text} 的好感度`;
+          attrName = `對 ${loveSelect.options[loveSelect.selectedIndex].text} 好感`;
         }
         
         const classRef = ref(db, 'classes/' + classId);
@@ -207,15 +334,23 @@
         try {
           await update(classRef, updates);
           const actionText = amount > 0 ? `+${amount}` : `${amount}`;
-          statusMsg.innerText = `✅ ${displayName} ${attrName} 已 ${actionText}`;
-          statusMsg.style.color = amount > 0 ? '#28a745' : '#dc3545';
           
+          statusMsg.innerText = `${amount > 0 ? '✨' : '💨'} ${displayName} ${attrName} 已 ${actionText}`;
+          if(amount < 0) {
+            statusMsg.style.background = '#fff1f2';
+            statusMsg.style.color = '#e11d48';
+          } else {
+            statusMsg.style.background = '#ecfdf5';
+            statusMsg.style.color = '#059669';
+          }
+          
+          statusMsg.classList.add('show');
           clearTimeout(statusTimeout);
-          statusTimeout = setTimeout(() => { statusMsg.innerText = ''; }, 2000);
+          statusTimeout = setTimeout(() => { statusMsg.classList.remove('show'); }, 2500);
           
         } catch (error) {
           console.error("更新失敗", error);
-          alert('連線失敗，請重試');
+          alert('❌ 連線失敗，請稍後再試');
         }
       });
     });

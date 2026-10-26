@@ -3,32 +3,127 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IBT - 即時排行榜</title>
+  <title>肆意盛夏 - 班級排行榜</title>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; color: #fff; padding: 20px; margin: 0; }
-    .header { text-align: center; margin-bottom: 30px; }
-    .header h1 { color: #e94560; font-size: 32px; text-transform: uppercase; letter-spacing: 2px; }
-    .leaderboard { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
-    .card { background: #16213e; border-radius: 10px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-left: 5px solid #e94560; transition: transform 0.2s; }
-    .card:hover { transform: scale(1.02); }
-    .rank-group { display: flex; align-items: center; gap: 15px; }
-    .rank { font-size: 24px; font-weight: bold; color: #0f3460; background: #fff; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-    .group-name { font-size: 20px; font-weight: bold; }
-    .scores { text-align: right; width: 75%; }
-    .total { font-size: 24px; font-weight: bold; color: #e94560; margin-bottom: 5px; }
-    .details { font-size: 13px; color: #a2a2a2; line-height: 1.6; }
-    .highlight { color: #fff; }
-    .love-details { font-size: 11px; color: #ffb6c1; margin-top: 3px; }
+    :root {
+      --primary: #ec4899;        /* 活力粉 */
+      --secondary: #fbbf24;      /* 夏日黃 */
+      --sky: #38bdf8;            /* 晴空藍 */
+      --text-main: #475569;      /* 柔和深灰 */
+      --card-bg: #ffffff;
+    }
+    
+    body { 
+      font-family: 'Segoe UI', 'Nunito', system-ui, sans-serif; 
+      /* 活潑的夏日漸層 + 點陣背景 */
+      background: linear-gradient(135deg, #fffbeb 0%, #fdf2f8 100%);
+      background-image: radial-gradient(#fbcfe8 2px, transparent 2px), radial-gradient(#fef08a 2px, transparent 2px);
+      background-size: 30px 30px;
+      background-position: 0 0, 15px 15px;
+      color: var(--text-main); 
+      padding: 20px; 
+      margin: 0; 
+      min-height: 100vh;
+    }
+
+    .header { text-align: center; margin-bottom: 35px; padding-top: 15px; }
+    
+    .header h1 { 
+      color: var(--primary); 
+      font-size: 40px; 
+      font-weight: 900;
+      letter-spacing: 2px; 
+      margin: 0 0 10px 0;
+      text-shadow: 2px 3px 0px #fbcfe8, 4px 5px 0px #fef08a; /* 可愛的多層立體陰影 */
+      animation: float 3s ease-in-out infinite; /* 標題微微浮動特效 */
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .header p { 
+      color: #64748b; 
+      font-size: 18px; 
+      font-weight: bold; 
+      margin: 0; 
+      background: #fff;
+      display: inline-block;
+      padding: 5px 20px;
+      border-radius: 20px;
+      border: 2px dashed #fbcfe8;
+    }
+    
+    .leaderboard { max-width: 850px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+    
+    .card { 
+      background: var(--card-bg); 
+      border: 3px solid #fff;
+      border-radius: 24px; 
+      padding: 20px 25px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      box-shadow: 0 8px 25px rgba(236, 72, 153, 0.1); 
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    }
+    .card:hover { transform: scale(1.02) translateY(-3px); box-shadow: 0 12px 30px rgba(236, 72, 153, 0.15); }
+    
+    /* 前三名專屬可愛外框 */
+    .rank-1 { border-color: #fde047; background: #fffbeb; }
+    .rank-2 { border-color: #e2e8f0; background: #f8fafc; }
+    .rank-3 { border-color: #fdba74; background: #fff7ed; }
+    
+    .rank-group { display: flex; align-items: center; gap: 15px; width: 30%; }
+    .rank-badge { 
+      font-size: 24px; 
+      font-weight: 900; 
+      color: #fff; 
+      width: 50px; 
+      height: 50px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      border-radius: 50%; /* 圓滾滾的數字標籤 */
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .group-name { font-size: 22px; font-weight: 800; color: #334155; }
+    
+    .scores { text-align: right; width: 70%; }
+    .total { font-size: 26px; font-weight: 800; color: #64748b; margin-bottom: 10px; }
+    .total span { color: var(--primary); font-size: 32px; font-weight: 900; }
+    
+    .details { 
+      display: inline-block;
+      background: #fdf2f8; 
+      border: 1px solid #fce7f3;
+      padding: 10px 18px; 
+      border-radius: 16px;
+      font-size: 14px; 
+      color: #64748b; 
+      line-height: 1.6; 
+      text-align: right;
+    }
+    .highlight { color: #db2777; font-weight: 700; }
+    .love-details { font-size: 12.5px; color: #f472b6; margin-top: 8px; font-weight: 600; }
+
+    @media (max-width: 600px) {
+      .card { flex-direction: column; align-items: flex-start; gap: 15px; padding: 18px; }
+      .rank-group { width: 100%; }
+      .scores { width: 100%; text-align: left; }
+      .details { text-align: left; width: 100%; box-sizing: border-box; }
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>🏆 IBT 即時戰況排名 🏆</h1>
-    <p>數據即時同步中...</p>
+    <h1>🍉 肆意盛夏班級排行榜 🌻</h1>
+    <p>✨ 陽陽為大家即時轉播最新戰況 ✨</p>
   </div>
   
   <div class="leaderboard" id="leaderboard">
-    <!-- 排名資料會透過 JavaScript 動態載入這裡 -->
+    <h3 style="text-align: center; color: #94a3b8; font-weight: normal;">陽陽正在幫你整理分數，請稍等... 🐾</h3>
   </div>
 
   <script type="module">
@@ -42,8 +137,7 @@
       projectId: "ibtmaingame",
       storageBucket: "ibtmaingame.firebasestorage.app",
       messagingSenderId: "1035805706833",
-      appId: "1:1035805706833:web:db8095540cdfb7b2ab8670",
-      measurementId: "G-9DQV12HBJ8"
+      appId: "1:1035805706833:web:db8095540cdfb7b2ab8670"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -56,8 +150,6 @@
 
       const classesArray = Object.keys(data).map(key => {
         const stats = data[key];
-        
-        // 抓取基礎分數
         const lang = stats.score_lang || 0;
         const sci = stats.score_sci || 0;
         const math = stats.score_math || 0;
@@ -65,8 +157,6 @@
         const econ = stats.score_econ || 0;
         const behavior = stats.score_behavior || 0;
         const sport = stats.score_sport || 0;
-        
-        // 抓取 6 位 NPC 戀愛分數
         const jiyinyin = stats.love_jiyinyin || 0;
         const yehuimei = stats.love_yehuimei || 0;
         const baizhaotang = stats.love_baizhaotang || 0;
@@ -75,8 +165,6 @@
         const ouyangruoxi = stats.love_ouyangruoxi || 0;
         
         const loveTotal = jiyinyin + yehuimei + baizhaotang + luofumeng + liujinxiu + ouyangruoxi;
-        
-        // 總積分
         const total = lang + sci + math + hisgeo + econ + behavior + sport + loveTotal;
         
         return { 
@@ -89,32 +177,35 @@
       });
 
       classesArray.sort((a, b) => b.total - a.total);
-
       const board = document.getElementById('leaderboard');
       board.innerHTML = ''; 
 
       classesArray.forEach((cls, index) => {
         const s = cls.scores;
         const l = cls.loves;
-        let rankColor = '#fff';
-        if (index === 0) rankColor = '#ffd700'; 
-        if (index === 1) rankColor = '#c0c0c0'; 
-        if (index === 2) rankColor = '#cd7f32'; 
+        let rankClass = '';
+        let badgeColor = '#94a3b8'; // 預設名次顏色 (灰色)
+        let icon = '';
+        
+        if (index === 0) { rankClass = 'rank-1'; badgeColor = '#f59e0b'; icon = '👑 '; }
+        else if (index === 1) { rankClass = 'rank-2'; badgeColor = '#94a3b8'; icon = '🥈 '; }
+        else if (index === 2) { rankClass = 'rank-3'; badgeColor = '#d97706'; icon = '🥉 '; }
+        else { badgeColor = '#cbd5e1'; } // 第四名之後的圓圈顏色更淡一點
 
         board.innerHTML += `
-          <div class="card">
+          <div class="card ${rankClass}">
             <div class="rank-group">
-              <div class="rank" style="background-color: ${rankColor}">${index + 1}</div>
-              <div class="group-name">${cls.name}</div>
+              <div class="rank-badge" style="background: ${badgeColor}">${index + 1}</div>
+              <div class="group-name">${icon}${cls.name}</div>
             </div>
             <div class="scores">
-              <div class="total">總積分: ${cls.total}</div>
+              <div class="total">總積分 <span>${cls.total}</span></div>
               <div class="details">
-                📚 成績：<span class="highlight">語文 ${s.lang} | 科學 ${s.sci} | 數學 ${s.math} | 史地 ${s.hisgeo} | 經濟 ${s.econ}</span><br>
+                📚 考試：<span class="highlight">語 ${s.lang} | 科 ${s.sci} | 數 ${s.math} | 史地 ${s.hisgeo} | 經 ${s.econ}</span><br>
                 🌟 日常：<span class="highlight">品行 ${s.behavior} | 體育 ${s.sport} | 💖戀愛總分 ${l.loveTotal}</span>
               </div>
               <div class="love-details">
-                ( 肌音音: ${l.jiyinyin} | 叶惠美: ${l.yehuimei} | 白昭棠: ${l.baizhaotang} | 罗浮梦: ${l.luofumeng} | 刘锦秀: ${l.liujinxiu} | 欧阳若曦: ${l.ouyangruoxi} )
+                ( 音音:${l.jiyinyin} 🌸 惠美:${l.yehuimei} 🌸 昭棠:${l.baizhaotang} 🌸 浮梦:${l.luofumeng} 🌸 锦秀:${l.liujinxiu} 🌸 若曦:${l.ouyangruoxi} )
               </div>
             </div>
           </div>
