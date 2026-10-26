@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>肆意盛夏 - 班級排行榜</title>
+  <title>肆意盛夏 - 排行榜登入</title>
   <style>
     :root {
       --primary: #ec4899;        /* 活力粉 */
@@ -15,7 +15,6 @@
     
     body { 
       font-family: 'Segoe UI', 'Nunito', system-ui, sans-serif; 
-      /* 活潑的夏日漸層 + 點陣背景 */
       background: linear-gradient(135deg, #fffbeb 0%, #fdf2f8 100%);
       background-image: radial-gradient(#fbcfe8 2px, transparent 2px), radial-gradient(#fef08a 2px, transparent 2px);
       background-size: 30px 30px;
@@ -26,66 +25,122 @@
       min-height: 100vh;
     }
 
-    .header { text-align: center; margin-bottom: 35px; padding-top: 15px; }
+    /* === 登入畫面專屬樣式 === */
+    .login-container {
+      max-width: 400px;
+      margin: 15vh auto; /* 讓登入框置中偏上 */
+      background: var(--card-bg);
+      padding: 40px 30px;
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(236, 72, 153, 0.15);
+      border: 3px solid #fff;
+      text-align: center;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
     
+    .login-container h1 { 
+      color: var(--primary); 
+      font-size: 32px; 
+      font-weight: 900;
+      margin-bottom: 10px;
+      margin-top: 0;
+      text-shadow: 2px 2px 0px #fbcfe8;
+    }
+    
+    .login-container p { color: #64748b; font-weight: bold; margin-bottom: 30px; }
+    
+    .login-container input {
+      width: 100%;
+      padding: 14px;
+      text-align: center;
+      letter-spacing: 2px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 16px;
+      outline: none;
+      box-sizing: border-box;
+      transition: all 0.3s;
+      background: #f8fafc;
+      color: #334155;
+    }
+    .login-container input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.15); }
+    
+    .error-msg {
+      color: #e11d48;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      height: 20px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .btn-login { 
+      width: 100%; 
+      background: linear-gradient(135deg, #f472b6, #ec4899); 
+      color: white; 
+      padding: 14px; 
+      border: none; 
+      border-radius: 12px; 
+      font-size: 18px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3); 
+      transition: all 0.2s; 
+    }
+    .btn-login:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4); }
+
+    /* === 排行榜主畫面樣式 (預設隱藏) === */
+    #mainApp { 
+      display: none; 
+      animation: fadeIn 0.5s ease forwards; 
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header { text-align: center; margin-bottom: 35px; padding-top: 15px; }
     .header h1 { 
       color: var(--primary); 
       font-size: 40px; 
       font-weight: 900;
       letter-spacing: 2px; 
       margin: 0 0 10px 0;
-      text-shadow: 2px 3px 0px #fbcfe8, 4px 5px 0px #fef08a; /* 可愛的多層立體陰影 */
-      animation: float 3s ease-in-out infinite; /* 標題微微浮動特效 */
+      text-shadow: 2px 3px 0px #fbcfe8, 4px 5px 0px #fef08a;
+      animation: float 3s ease-in-out infinite; 
     }
-    
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-8px); }
     }
 
     .header p { 
-      color: #64748b; 
-      font-size: 18px; 
-      font-weight: bold; 
-      margin: 0; 
-      background: #fff;
-      display: inline-block;
-      padding: 5px 20px;
-      border-radius: 20px;
-      border: 2px dashed #fbcfe8;
+      color: #64748b; font-size: 18px; font-weight: bold; margin: 0; 
+      background: #fff; display: inline-block; padding: 5px 20px;
+      border-radius: 20px; border: 2px dashed #fbcfe8;
     }
     
     .leaderboard { max-width: 850px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
     
     .card { 
-      background: var(--card-bg); 
-      border: 3px solid #fff;
-      border-radius: 24px; 
-      padding: 20px 25px; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      box-shadow: 0 8px 25px rgba(236, 72, 153, 0.1); 
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+      background: var(--card-bg); border: 3px solid #fff; border-radius: 24px; padding: 20px 25px; 
+      display: flex; justify-content: space-between; align-items: center; 
+      box-shadow: 0 8px 25px rgba(236, 72, 153, 0.1); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
     }
     .card:hover { transform: scale(1.02) translateY(-3px); box-shadow: 0 12px 30px rgba(236, 72, 153, 0.15); }
     
-    /* 前三名專屬可愛外框 */
     .rank-1 { border-color: #fde047; background: #fffbeb; }
     .rank-2 { border-color: #e2e8f0; background: #f8fafc; }
     .rank-3 { border-color: #fdba74; background: #fff7ed; }
     
     .rank-group { display: flex; align-items: center; gap: 15px; width: 30%; }
     .rank-badge { 
-      font-size: 24px; 
-      font-weight: 900; 
-      color: #fff; 
-      width: 50px; 
-      height: 50px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      border-radius: 50%; /* 圓滾滾的數字標籤 */
+      font-size: 24px; font-weight: 900; color: #fff; width: 50px; height: 50px; 
+      display: flex; align-items: center; justify-content: center; border-radius: 50%; 
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     .group-name { font-size: 22px; font-weight: 800; color: #334155; }
@@ -95,15 +150,8 @@
     .total span { color: var(--primary); font-size: 32px; font-weight: 900; }
     
     .details { 
-      display: inline-block;
-      background: #fdf2f8; 
-      border: 1px solid #fce7f3;
-      padding: 10px 18px; 
-      border-radius: 16px;
-      font-size: 14px; 
-      color: #64748b; 
-      line-height: 1.6; 
-      text-align: right;
+      display: inline-block; background: #fdf2f8; border: 1px solid #fce7f3;
+      padding: 10px 18px; border-radius: 16px; font-size: 14px; color: #64748b; line-height: 1.6; text-align: right;
     }
     .highlight { color: #db2777; font-weight: 700; }
     .love-details { font-size: 12.5px; color: #f472b6; margin-top: 8px; font-weight: 600; }
@@ -117,101 +165,149 @@
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>🍉 肆意盛夏班級排行榜 🌻</h1>
-    <p>✨ 陽陽為大家即時轉播最新戰況 ✨</p>
+
+  <!-- 1. 登入畫面 -->
+  <div class="login-container" id="loginScreen">
+    <h1>🍉 肆意盛夏 🌻</h1>
+    <h2 style="color: #db2777; margin-top: -5px; font-size: 22px;">即時排行榜</h2>
+    <p>請輸入通行密碼以查看最新戰況</p>
+    <input type="password" id="viewerPassword" placeholder="輸入密碼">
+    <div class="error-msg" id="errorMsg">密碼錯誤，請重新輸入！</div>
+    <button class="btn-login" id="btnLogin">進入排行榜 ✨</button>
   </div>
-  
-  <div class="leaderboard" id="leaderboard">
-    <h3 style="text-align: center; color: #94a3b8; font-weight: normal;">陽陽正在幫你整理分數，請稍等... 🐾</h3>
+
+  <!-- 2. 排行榜主畫面 (預設隱藏) -->
+  <div id="mainApp">
+    <div class="header">
+      <h1>🍉 肆意盛夏班級排行榜 🌻</h1>
+      <p>✨ 陽陽為大家即時轉播最新戰況 ✨</p>
+    </div>
+    
+    <div class="leaderboard" id="leaderboard">
+      <h3 style="text-align: center; color: #94a3b8; font-weight: normal;">陽陽正在幫你整理分數，請稍等... 🐾</h3>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA7W4Q_-gD6---wDUTrD8YdBtOATOZGbbM",
-      authDomain: "ibtmaingame.firebaseapp.com",
-      databaseURL: "https://ibtmaingame-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "ibtmaingame",
-      storageBucket: "ibtmaingame.firebasestorage.app",
-      messagingSenderId: "1035805706833",
-      appId: "1:1035805706833:web:db8095540cdfb7b2ab8670"
-    };
+    // 🔴 在這裡設定排行榜的觀看密碼 🔴
+    const CORRECT_PASSWORD = "IBT888"; 
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const dbRef = ref(db, 'classes');
+    // --- 登入邏輯 ---
+    const loginScreen = document.getElementById('loginScreen');
+    const mainApp = document.getElementById('mainApp');
+    const btnLogin = document.getElementById('btnLogin');
+    const passwordInput = document.getElementById('viewerPassword');
+    const errorMsg = document.getElementById('errorMsg');
 
-    onValue(dbRef, (snapshot) => {
-      const data = snapshot.val();
-      if (!data) return;
-
-      const classesArray = Object.keys(data).map(key => {
-        const stats = data[key];
-        const lang = stats.score_lang || 0;
-        const sci = stats.score_sci || 0;
-        const math = stats.score_math || 0;
-        const hisgeo = stats.score_hisgeo || 0;
-        const econ = stats.score_econ || 0;
-        const behavior = stats.score_behavior || 0;
-        const sport = stats.score_sport || 0;
-        const jiyinyin = stats.love_jiyinyin || 0;
-        const yehuimei = stats.love_yehuimei || 0;
-        const baizhaotang = stats.love_baizhaotang || 0;
-        const luofumeng = stats.love_luofumeng || 0;
-        const liujinxiu = stats.love_liujinxiu || 0;
-        const ouyangruoxi = stats.love_ouyangruoxi || 0;
+    function attemptLogin() {
+      if (passwordInput.value === CORRECT_PASSWORD) {
+        loginScreen.style.display = 'none';
+        mainApp.style.display = 'block';
+        document.title = "肆意盛夏 - 班級排行榜";
         
-        const loveTotal = jiyinyin + yehuimei + baizhaotang + luofumeng + liujinxiu + ouyangruoxi;
-        const total = lang + sci + math + hisgeo + econ + behavior + sport + loveTotal;
-        
-        return { 
-          id: key, 
-          name: `Class ${key.replace('class', '')}`,
-          scores: { lang, sci, math, hisgeo, econ, behavior, sport },
-          loves: { jiyinyin, yehuimei, baizhaotang, luofumeng, liujinxiu, ouyangruoxi, loveTotal },
-          total: total
-        };
-      });
+        // 密碼正確後，才開始載入 Firebase 數據
+        startFirebase(); 
+      } else {
+        errorMsg.style.opacity = '1';
+        passwordInput.value = '';
+        setTimeout(() => { errorMsg.style.opacity = '0'; }, 3000);
+      }
+    }
 
-      classesArray.sort((a, b) => b.total - a.total);
-      const board = document.getElementById('leaderboard');
-      board.innerHTML = ''; 
-
-      classesArray.forEach((cls, index) => {
-        const s = cls.scores;
-        const l = cls.loves;
-        let rankClass = '';
-        let badgeColor = '#94a3b8'; // 預設名次顏色 (灰色)
-        let icon = '';
-        
-        if (index === 0) { rankClass = 'rank-1'; badgeColor = '#f59e0b'; icon = '👑 '; }
-        else if (index === 1) { rankClass = 'rank-2'; badgeColor = '#94a3b8'; icon = '🥈 '; }
-        else if (index === 2) { rankClass = 'rank-3'; badgeColor = '#d97706'; icon = '🥉 '; }
-        else { badgeColor = '#cbd5e1'; } // 第四名之後的圓圈顏色更淡一點
-
-        board.innerHTML += `
-          <div class="card ${rankClass}">
-            <div class="rank-group">
-              <div class="rank-badge" style="background: ${badgeColor}">${index + 1}</div>
-              <div class="group-name">${icon}${cls.name}</div>
-            </div>
-            <div class="scores">
-              <div class="total">總積分 <span>${cls.total}</span></div>
-              <div class="details">
-                📚 考試：<span class="highlight">語 ${s.lang} | 科 ${s.sci} | 數 ${s.math} | 史地 ${s.hisgeo} | 經 ${s.econ}</span><br>
-                🌟 日常：<span class="highlight">品行 ${s.behavior} | 體育 ${s.sport} | 💖戀愛總分 ${l.loveTotal}</span>
-              </div>
-              <div class="love-details">
-                ( 音音:${l.jiyinyin} 🌸 惠美:${l.yehuimei} 🌸 昭棠:${l.baizhaotang} 🌸 浮梦:${l.luofumeng} 🌸 锦秀:${l.liujinxiu} 🌸 若曦:${l.ouyangruoxi} )
-              </div>
-            </div>
-          </div>
-        `;
-      });
+    btnLogin.addEventListener('click', attemptLogin);
+    passwordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') attemptLogin();
     });
+
+    // --- Firebase 載入邏輯 ---
+    function startFirebase() {
+      const firebaseConfig = {
+        apiKey: "AIzaSyA7W4Q_-gD6---wDUTrD8YdBtOATOZGbbM",
+        authDomain: "ibtmaingame.firebaseapp.com",
+        databaseURL: "https://ibtmaingame-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "ibtmaingame",
+        storageBucket: "ibtmaingame.firebasestorage.app",
+        messagingSenderId: "1035805706833",
+        appId: "1:1035805706833:web:db8095540cdfb7b2ab8670"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+      const dbRef = ref(db, 'classes');
+
+      onValue(dbRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        const classesArray = Object.keys(data).map(key => {
+          const stats = data[key];
+          const lang = stats.score_lang || 0;
+          const sci = stats.score_sci || 0;
+          const math = stats.score_math || 0;
+          const hisgeo = stats.score_hisgeo || 0;
+          const econ = stats.score_econ || 0;
+          const behavior = stats.score_behavior || 0;
+          const sport = stats.score_sport || 0;
+          
+          const jiyinyin = stats.love_jiyinyin || 0;
+          const yehuimei = stats.love_yehuimei || 0;
+          const baizhaotang = stats.love_baizhaotang || 0;
+          const luofumeng = stats.love_luofumeng || 0;
+          const liujinxiu = stats.love_liujinxiu || 0;
+          const ouyangruoxi = stats.love_ouyangruoxi || 0;
+          
+          const loveTotal = jiyinyin + yehuimei + baizhaotang + luofumeng + liujinxiu + ouyangruoxi;
+          const total = lang + sci + math + hisgeo + econ + behavior + sport + loveTotal;
+          
+          return { 
+            id: key, 
+            name: `Class ${key.replace('class', '')}`,
+            scores: { lang, sci, math, hisgeo, econ, behavior, sport },
+            loves: { jiyinyin, yehuimei, baizhaotang, luofumeng, liujinxiu, ouyangruoxi, loveTotal },
+            total: total
+          };
+        });
+
+        classesArray.sort((a, b) => b.total - a.total);
+        const board = document.getElementById('leaderboard');
+        board.innerHTML = ''; 
+
+        classesArray.forEach((cls, index) => {
+          const s = cls.scores;
+          const l = cls.loves;
+          let rankClass = '';
+          let badgeColor = '#94a3b8'; 
+          let icon = '';
+          
+          if (index === 0) { rankClass = 'rank-1'; badgeColor = '#f59e0b'; icon = '👑 '; }
+          else if (index === 1) { rankClass = 'rank-2'; badgeColor = '#94a3b8'; icon = '🥈 '; }
+          else if (index === 2) { rankClass = 'rank-3'; badgeColor = '#d97706'; icon = '🥉 '; }
+          else { badgeColor = '#cbd5e1'; } 
+
+          board.innerHTML += `
+            <div class="card ${rankClass}">
+              <div class="rank-group">
+                <div class="rank-badge" style="background: ${badgeColor}">${index + 1}</div>
+                <div class="group-name">${icon}${cls.name}</div>
+              </div>
+              <div class="scores">
+                <div class="total">總積分 <span>${cls.total}</span></div>
+                <div class="details">
+                  📚 考試：<span class="highlight">語 ${s.lang} | 科 ${s.sci} | 數 ${s.math} | 史地 ${s.hisgeo} | 經 ${s.econ}</span><br>
+                  🌟 日常：<span class="highlight">品行 ${s.behavior} | 體育 ${s.sport} | 💖戀愛總分 ${l.loveTotal}</span>
+                </div>
+                <div class="love-details">
+                  ( 音音:${l.jiyinyin} 🌸 惠美:${l.yehuimei} 🌸 昭棠:${l.baizhaotang} 🌸 浮梦:${l.luofumeng} 🌸 锦秀:${l.liujinxiu} 🌸 若曦:${l.ouyangruoxi} )
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      });
+    }
   </script>
 </body>
 </html>
