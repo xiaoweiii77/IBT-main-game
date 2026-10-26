@@ -1,30 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<script>
-    // 在网页载入任何画面和 Firebase 之前，先拦截检查密码
-    const pass = prompt("🔒 身份验证：请输入工作人员密码");
-    
-    // 你可以在这里设定你的专属密码，例如设定为 "IBT888"
-    if (pass !== "IBT888") {
-      // 如果密码错误，直接把整个网页清空，显示拒绝存取
-      document.documentElement.innerHTML = "<h1 style='color:red; text-align:center; margin-top:50px;'>❌ 密码错误，拒绝存取！</h1>";
-      // 停止执行后续所有的系统程式码
-      throw new Error("密码错误，停止载入系统");
-    }
-  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IBT 青春操作台</title>
+  <title>IBT 青春操作台 - 登入</title>
   <style>
     :root {
-      /* 青春粉色主題色票 */
-      --primary: #ec4899;        /* 亮粉色 */
-      --primary-hover: #db2777;  /* 深粉色 */
-      --primary-light: #fce7f3;  /* 淺粉背景 */
-      --primary-border: #fbcfe8; /* 粉色邊框 */
+      var(--primary): #ec4899;
+      --primary-hover: #db2777;
+      --primary-light: #fce7f3;
+      --primary-border: #fbcfe8;
       
-      /* 按鈕馬卡龍色 */
       --success-bg: #ecfdf5;
       --success-border: #a7f3d0;
       --success-text: #059669;
@@ -33,9 +19,9 @@
       --danger-border: #fecdd3;
       --danger-text: #e11d48;
       
-      --bg-color: #fdf2f8;       /* 整體網頁極淺粉背景 */
+      --bg-color: #fdf2f8;
       --card-bg: #ffffff;
-      --text-main: #475569;      /* 柔和的深灰色字體 (不使用死黑) */
+      --text-main: #475569;
     }
     
     body { 
@@ -45,137 +31,118 @@
       padding: 15px; 
       margin: 0; 
       background-image: radial-gradient(#fbcfe8 1px, transparent 1px);
-      background-size: 20px 20px; /* 增加一點可愛的點陣背景 */
+      background-size: 20px 20px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; /* 讓內容靠上，避免手機鍵盤擋住 */
+      padding-top: 5vh;
     }
     
-    .container { 
+    /* === 登入畫面專屬樣式 === */
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      background: var(--card-bg);
+      padding: 40px 30px;
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(236, 72, 153, 0.15);
+      border: 2px solid #fff;
+      text-align: center;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .login-container h1 { font-size: 32px; margin-bottom: 10px; }
+    .login-container p { color: #94a3b8; font-weight: bold; margin-bottom: 30px; }
+    .login-container input {
+      width: 100%;
+      text-align: center;
+      letter-spacing: 2px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .error-msg {
+      color: #e11d48;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      height: 20px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    /* === 主控制台樣式 (與原本相同) === */
+    .app-container { 
+      display: none; /* 預設隱藏，登入後顯示 */
+      width: 100%;
       max-width: 550px; 
-      margin: 0 auto; 
       background: var(--card-bg); 
       padding: 25px; 
-      border-radius: 24px; /* 更圓潤的邊角 */
-      box-shadow: 0 10px 40px rgba(236, 72, 153, 0.08); /* 柔和的粉色陰影 */
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(236, 72, 153, 0.08);
       border: 2px solid #fff;
+      animation: fadeIn 0.5s ease forwards;
     }
     
-    h1 { 
-      text-align: center; 
-      color: var(--primary); 
-      font-size: 28px; 
-      font-weight: 800; 
-      margin-top: 0; 
-      margin-bottom: 25px;
-      letter-spacing: 1px;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
+
+    h1 { color: #ec4899; font-size: 28px; font-weight: 800; margin-top: 0; margin-bottom: 25px; letter-spacing: 1px; text-align: center; }
     
-    .section { 
-      background: #ffffff; 
-      border: 2px solid var(--primary-light); 
-      border-radius: 20px; 
-      padding: 20px; 
-      margin-bottom: 25px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-    }
-    
-    .section h2 { 
-      margin-top: 0; 
-      font-size: 18px; 
-      color: var(--primary-hover); 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-      border-bottom: 2px dashed var(--primary-border); 
-      padding-bottom: 12px; 
-    }
+    .section { background: #ffffff; border: 2px solid #fce7f3; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+    .section h2 { margin-top: 0; font-size: 18px; color: #db2777; display: flex; align-items: center; gap: 8px; border-bottom: 2px dashed #fbcfe8; padding-bottom: 12px; }
     
     label { display: block; margin: 15px 0 8px; font-weight: 600; color: #64748b; font-size: 15px; }
     
     select, input { 
-      width: 100%; 
-      padding: 14px; 
-      border: 2px solid #e2e8f0; 
-      border-radius: 12px; 
-      box-sizing: border-box; 
-      font-size: 16px; 
-      background: #f8fafc; 
-      transition: all 0.3s ease; 
-      outline: none; 
-      color: #334155;
+      width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; 
+      font-size: 16px; background: #f8fafc; transition: all 0.3s ease; outline: none; color: #334155;
     }
-    select:focus, input:focus { 
-      border-color: var(--primary); 
-      background: #fff;
-      box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.15); 
-    }
+    select:focus, input:focus { border-color: #ec4899; background: #fff; box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.15); }
     
     button { padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
     button:active { transform: scale(0.95); }
     
-    .btn-update { 
-      width: 100%; 
-      background: linear-gradient(135deg, #f472b6, #ec4899); /* 青春漸層粉 */
-      color: white;
-      margin-top: 15px; 
-      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3); 
-    }
-    .btn-update:hover { 
-      background: linear-gradient(135deg, #ec4899, #db2777); 
-      box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4); 
-    }
+    .btn-update { width: 100%; background: linear-gradient(135deg, #f472b6, #ec4899); color: white; margin-top: 15px; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3); }
+    .btn-update:hover { background: linear-gradient(135deg, #ec4899, #db2777); box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4); }
     
-    .score-row { 
-      background: #fff; 
-      padding: 15px 0; 
-      margin-bottom: 5px; 
-      border-bottom: 1px dashed #f1f5f9;
-    }
+    .score-row { background: #fff; padding: 15px 0; margin-bottom: 5px; border-bottom: 1px dashed #f1f5f9; }
     .score-row:last-child { border-bottom: none; }
-    
-    .score-label { 
-      font-size: 16px; 
-      font-weight: 700; 
-      color: #475569; 
-      margin-bottom: 12px; 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-    }
+    .score-label { font-size: 16px; font-weight: 700; color: #475569; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
     
     .btn-group { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; width: 100%; }
     .btn-group button { height: 46px; padding: 0; font-size: 16px; border-radius: 10px; font-weight: 800; }
     
-    /* 柔和的扣分按鈕 */
-    .btn-minus { background-color: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-border); }
+    .btn-minus { background-color: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
     .btn-minus:hover { background-color: #ffe4e6; border-color: #fda4af; }
-    
-    /* 柔和的加分按鈕 */
-    .btn-plus { background-color: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
+    .btn-plus { background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
     .btn-plus:hover { background-color: #d1fae5; border-color: #6ee7b7; }
     
-    #statusMsg { 
-      text-align: center; height: 24px; font-weight: bold; margin-bottom: 15px; font-size: 15px; 
-      background: #f0fdf4; color: #16a34a; border-radius: 10px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;
-    }
+    #statusMsg { text-align: center; height: 24px; font-weight: bold; margin-bottom: 15px; font-size: 15px; border-radius: 10px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
     #statusMsg.show { opacity: 1; }
     
-    /* 頂部選擇區特別裝飾 */
-    .top-selector {
-      background: var(--primary-light); 
-      padding: 18px; 
-      border-radius: 16px; 
-      margin-bottom: 25px; 
-      border: 1px solid var(--primary-border);
-    }
+    .top-selector { background: #fce7f3; padding: 18px; border-radius: 16px; margin-bottom: 25px; border: 1px solid #fbcfe8; }
   </style>
 </head>
 <body>
-  <div class="container">
+
+  <!-- 1. 登入畫面區塊 -->
+  <div class="login-container" id="loginScreen">
+    <h1>🌸 NPC 登入 🌸</h1>
+    <p>肆意盛夏 工作人員專屬</p>
+    <input type="password" id="adminPassword" placeholder="請輸入通行密碼">
+    <div class="error-msg" id="errorMsg">密碼錯誤，請重新輸入！</div>
+    <button class="btn-update" id="btnLogin">確認登入 ✨</button>
+  </div>
+
+  <!-- 2. NPC 操作主畫面區塊 (預設隱藏) -->
+  <div class="app-container" id="mainApp">
     <h1>🌸 IBT 青春操作台 🌸</h1>
     
-    <!-- 頂部班級選擇 -->
     <div class="top-selector">
-      <label style="margin-top: 0; color: var(--primary-hover);">📍 選擇要操作的班級：</label>
-      <select id="classSelect" style="border-color: var(--primary-border); background: #fff;">
+      <label style="margin-top: 0; color: #db2777;">📍 選擇要操作的班級：</label>
+      <select id="classSelect" style="border-color: #fbcfe8; background: #fff;">
         <option value="classA">Class A (Red 红色)</option>
         <option value="classB">Class B (Tiffany 浅蓝绿色)</option>
         <option value="classC">Class C (Brown 棕色)</option>
@@ -191,7 +158,6 @@
       </select>
     </div>
 
-    <!-- 模式一：考試成績 -->
     <div class="section">
       <h2>📝 考試成績 <span style="font-size: 12px; font-weight: normal; color: #94a3b8; margin-left: auto;">(保留該科最高分)</span></h2>
       <div style="display: flex; gap: 12px;">
@@ -213,16 +179,14 @@
       <button id="btnStudy" class="btn-update">✨ 刷新該科紀錄</button>
     </div>
 
-    <!-- 模式二：日常積分 -->
     <div class="section">
       <h2>🌟 日常積分 <span style="font-size: 12px; font-weight: normal; color: #94a3b8; margin-left: auto;">(快速點擊加減)</span></h2>
       <div id="statusMsg"></div>
 
-      <!-- 戀愛積分 -->
       <div class="score-row">
         <div class="score-label">
           💌 對
-          <select id="npcLoveSelect" style="margin: 0; width: auto; padding: 6px 12px; font-size: 14px; border-color: var(--primary-border); background: #fffafc; color: var(--primary-hover); border-radius: 8px;">
+          <select id="npcLoveSelect" style="margin: 0; width: auto; padding: 6px 12px; font-size: 14px; border-color: #fbcfe8; background: #fffafc; color: #db2777; border-radius: 8px;">
             <option value="love_jiyinyin">肌音音</option>
             <option value="love_yehuimei">叶惠美</option>
             <option value="love_baizhaotang">白昭棠</option>
@@ -242,7 +206,6 @@
         </div>
       </div>
 
-      <!-- 品行積分 -->
       <div class="score-row">
         <div class="score-label">⭐ 品行積分</div>
         <div class="btn-group">
@@ -255,7 +218,6 @@
         </div>
       </div>
 
-      <!-- 體育積分 -->
       <div class="score-row" style="border-bottom: none;">
         <div class="score-label">🏃 體育積分</div>
         <div class="btn-group">
@@ -274,6 +236,35 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
     import { getDatabase, ref, get, update, increment } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
+    // 🔴 在這裡設定你的專屬登入密碼 🔴
+    const CORRECT_PASSWORD = "IBT888"; 
+
+    // --- 登入邏輯 ---
+    const loginScreen = document.getElementById('loginScreen');
+    const mainApp = document.getElementById('mainApp');
+    const btnLogin = document.getElementById('btnLogin');
+    const passwordInput = document.getElementById('adminPassword');
+    const errorMsg = document.getElementById('errorMsg');
+
+    function attemptLogin() {
+      if (passwordInput.value === CORRECT_PASSWORD) {
+        loginScreen.style.display = 'none';
+        mainApp.style.display = 'block';
+        document.title = "IBT 青春操作台"; // 登入後更改網頁標題
+      } else {
+        errorMsg.style.opacity = '1';
+        passwordInput.value = '';
+        setTimeout(() => { errorMsg.style.opacity = '0'; }, 3000);
+      }
+    }
+
+    btnLogin.addEventListener('click', attemptLogin);
+    passwordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') attemptLogin();
+    });
+    // ---------------
+
+    // --- Firebase 資料庫邏輯 ---
     const firebaseConfig = {
       apiKey: "AIzaSyA7W4Q_-gD6---wDUTrD8YdBtOATOZGbbM",
       authDomain: "ibtmaingame.firebaseapp.com",
