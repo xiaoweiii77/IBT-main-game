@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>拍賣即時戰況 - 肆意盛夏</title>
+  <style>
+    body { 
+      font-family: 'Segoe UI', system-ui, sans-serif; 
+      background: linear-gradient(135deg, #fffbeb 0%, #fdf2f8 100%);
+      color: #334155; 
+      padding: 20px; 
+      text-align: center; 
+      margin: 0;
+      min-height: 100vh;
+    }
+    .container { max-width: 700px; margin: 0 auto; }
+    h1 { color: #ec4899; font-size: 36px; text-shadow: 2px 2px 0px #fbcfe8; margin-bottom: 5px; }
+    .item-box { background: #fff; border: 4px dashed #fbcfe8; border-radius: 20px; padding: 20px; margin-bottom: 30px; box-shadow: 0 10px 20px rgba(236,72,153,0.1); }
+    .item-name { font-size: 32px; font-weight: 900; color: #db2777; }
+    
+    .status-badge { display: inline-block; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 18px; margin-top: 10px; }
+    .status-active { background: #ecfdf5; color: #059669; border: 2px solid #a7f3d0; animation: pulse 1.5s infinite; }
+    .status-ended { background: #fff1f2; color: #e11d48; border: 2px solid #fecdd3; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+    .board-grid { display: grid; gap: 15px; grid-template-columns: 1fr; }
+    
+    .bid-card { 
+      background: #fff; padding: 20px; border-radius: 16px; border: 2px solid #e2e8f0;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: all 0.3s;
+    }
+    /* 第一名特效 */
+    .bid-card.rank-1 { border-color: #fde047; background: #fffbeb; transform: scale(1.02); box-shadow: 0 5px 15px rgba(253,224,71,0.4); }
+    
+    .rank-num { font-size: 24px; font-weight: 900; width: 40px; height: 40px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #64748b; }
+    .rank-1 .rank-num { background: #f59e0b; color: #fff; }
+    
+    .cls-name { font-size: 22px; font-weight: bold; flex-grow: 1; text-align: left; margin-left: 15px; }
+    .cls-amount { font-size: 28px; font-weight: 900; color: #ec4899; }
+
+    .winner-overlay {
+      display: none;
+      background: rgba(255,255,255,0.9);
+      padding: 30px; border-radius: 20px;
+      border: 4px solid #fde047;
+      margin-top: -20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2);
+    }
+    .winner-overlay h2 { color: #d97706; font-size: 30px; margin-top: 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💌 告白信封拍賣會</h1>
+    
+    <div class="item-box">
+      <div class="item-name" id="displayItem">等待關主開啟拍賣...</div>
+      <div class="status-badge" id="displayStatus">準備中</div>
+    </div>
+
+    <!-- 結標時出現的慶祝文字 -->
+    <div class="winner-overlay" id="winnerOverlay">
+      <h2>🎉 拍賣結束！恭喜得標班級 🎉</h2>
+      <p style="color: #64748b; font-size: 18px; font-weight: bold;">(以下為最終 Top 6 名單)</p>
+    </div>
+
+    <!-- Top 6 顯示區 -->
+    <div class="board-grid" id="bidBoard">
+      <!-- JS 動態寫入 -->
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA7W4Q_-gD6---wDUTrD8YdBtOATOZGbbM",
+      authDomain: "ibtmaingame.firebaseapp.com",
+      databaseURL: "https://ibtmaingame-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "ibtmaingame",
+      storageBucket: "ibtmaingame.firebasestorage.app",
+      messagingSenderId: "1035805706833",
+      appId: "1:1035805706833:web:db8095540cdfb7b2ab8670"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auctionRef = ref(db, 'auction');
+
+    onValue(auctionRef, (snapshot) => {
+      const data = snapshot.val();
+      if (!data) return;
+
+      // 更新商品與狀態
+      document.getElementById('displayItem').innerText = data.itemName;
+      const statusEl = document.getElementById('displayStatus');
+      const winnerEl = document.getElementById('winnerOverlay');
+
+      if(data.status === 'active') {
+        statusEl.innerText = '🔥 激烈競標中';
+        statusEl.className = 'status-badge status-active';
+        winnerEl.style.display = 'none';
+      } else if (data.status === 'ended') {
+        statusEl.innerText = '🛑 拍賣已結標';
+        statusEl.className = 'status-badge status-ended';
+        winnerEl.style.display = 'block';
+      } else {
+        statusEl.innerText = '💤 準備中';
+        statusEl.className = 'status-badge';
+        winnerEl.style.display = 'none';
+      }
+
+      // 處理出價排序 (提取所有大於 0 的出價)
+      const bidsObj = data.bids || {};
+      const bidsArr = Object.keys(bidsObj)
+        .map(key => ({ name: key, amount: bidsObj[key] }))
+        .filter(b => b.amount > 0); // 只顯示有出價的
+
+      // 由高到低排序
+      bidsArr.sort((a, b) => b.amount - a.amount);
+      
+      // 取前 6 名
+      const top6 = bidsArr.slice(0, 6);
+
+      const board = document.getElementById('bidBoard');
+      board.innerHTML = '';
+
+      if(top6.length === 0) {
+        board.innerHTML = `<h3 style="color:#94a3b8; margin-top: 40px;">目前尚無班級出價</h3>`;
+        return;
+      }
+
+      top6.forEach((bid, index) => {
+        const isFirst = index === 0 ? 'rank-1' : '';
+        const icon = index === 0 ? '👑 ' : '';
+        board.innerHTML += `
+          <div class="bid-card ${isFirst}">
+            <div class="rank-num">${index + 1}</div>
+            <div class="cls-name">${icon}${bid.name}</div>
+            <div class="cls-amount">💰 ${bid.amount}</div>
+          </div>
+        `;
+      });
+    });
+  </script>
+</body>
+</html>

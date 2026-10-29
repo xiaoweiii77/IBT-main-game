@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <script>
+    const pass = prompt("🔒 關主驗證：請輸入拍賣管理密碼");
+    if (pass !== "IBT888") {
+      document.documentElement.innerHTML = "<h1 style='color:red; text-align:center; margin-top:50px;'>❌ 密碼錯誤！</h1>";
+      throw new Error("密碼錯誤");
+    }
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>拍賣關主操作台</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #fdf2f8; padding: 20px; color: #334155; }
+    .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(236, 72, 153, 0.1); border: 2px solid #fbcfe8; }
+    h1 { text-align: center; color: #ec4899; margin-top: 0; }
+    .section { background: #fffbeb; border-radius: 15px; padding: 15px; margin-bottom: 20px; border: 1px solid #fef08a; }
+    label { display: block; font-weight: bold; margin-bottom: 8px; color: #db2777; }
+    input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
+    input:focus, select:focus { border-color: #ec4899; }
+    button { width: 100%; padding: 14px; font-size: 18px; font-weight: bold; color: #fff; background: #ec4899; border: none; border-radius: 10px; cursor: pointer; margin-bottom: 10px; transition: transform 0.1s; }
+    button:active { transform: scale(0.98); }
+    .btn-end { background: #ef4444; }
+    .btn-reset { background: #94a3b8; }
+    .live-status { font-size: 14px; color: #64748b; background: #f1f5f9; padding: 10px; border-radius: 10px; height: 100px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔨 關主拍賣控制台</h1>
+
+    <!-- 步驟 1：設定商品 -->
+    <div class="section">
+      <label>1. 設定拍賣商品名稱：</label>
+      <input type="text" id="itemName" placeholder="例如：告白信封 A">
+      <button id="btnStartItem">發布商品並開始競標</button>
+    </div>
+
+    <!-- 步驟 2：手動輸入出價 -->
+    <div class="section" style="background: #f0fdf4; border-color: #bbf7d0;">
+      <label>2. 登記班級出價：</label>
+      <select id="classSelect">
+        <option value="Class A">Class A</option>
+        <option value="Class B">Class B</option>
+        <option value="Class C">Class C</option>
+        <option value="Class D">Class D</option>
+        <option value="Class E">Class E</option>
+        <option value="Class F">Class F</option>
+        <option value="Class G">Class G</option>
+        <option value="Class H">Class H</option>
+        <option value="Class I">Class I</option>
+        <option value="Class J">Class J</option>
+        <option value="Class K">Class K</option>
+        <option value="Class L">Class L</option>
+      </select>
+      <input type="number" id="bidAmount" placeholder="輸入該班喊出的最新價格">
+      <button id="btnSetBid" style="background: #10b981;">更新此班級出價</button>
+    </div>
+
+    <!-- 步驟 3：結標與重置 -->
+    <div class="section">
+      <label>目前的出價戰況 (Top 6)：</label>
+      <div class="live-status" id="liveStatus">載入中...</div>
+      <br>
+      <button class="btn-end" id="btnEnd">🎉 停止出價 (公布前6名贏家)</button>
+      <button class="btn-reset" id="btnReset">清除所有價格 (準備下一輪)</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA7W4Q_-gD6---wDUTrD8YdBtOATOZGbbM",
+      authDomain: "ibtmaingame.firebaseapp.com",
+      databaseURL: "https://ibtmaingame-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "ibtmaingame",
+      storageBucket: "ibtmaingame.firebasestorage.app",
+      messagingSenderId: "1035805706833",
+      appId: "1:1035805706833:web:db8095540cdfb7b2ab8670"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auctionRef = ref(db, 'auction');
+
+    // 發布新商品
+    document.getElementById('btnStartItem').addEventListener('click', async () => {
+      const name = document.getElementById('itemName').value;
+      if(!name) return alert("請輸入商品名稱");
+      await update(auctionRef, { itemName: name, status: 'active' });
+      alert(`已發布：${name}`);
+    });
+
+    // 登記出價
+    document.getElementById('btnSetBid').addEventListener('click', async () => {
+      const cls = document.getElementById('classSelect').value;
+      const amt = parseInt(document.getElementById('bidAmount').value);
+      if(isNaN(amt)) return alert("請輸入有效數字");
+      
+      const bidRef = ref(db, 'auction/bids');
+      await update(bidRef, { [cls]: amt });
+      document.getElementById('bidAmount').value = '';
+    });
+
+    // 結標
+    document.getElementById('btnEnd').addEventListener('click', async () => {
+      if(confirm("確定要結標嗎？大螢幕將鎖定並公布前6名贏家！")) {
+        await update(auctionRef, { status: 'ended' });
+      }
+    });
+
+    // 重置所有分數為 0
+    document.getElementById('btnReset').addEventListener('click', async () => {
+      if(confirm("確定要歸零所有班級的出價，準備下一輪拍賣嗎？")) {
+        const resets = {
+          "Class A": 0, "Class B": 0, "Class C": 0, "Class D": 0,
+          "Class E": 0, "Class F": 0, "Class G": 0, "Class H": 0,
+          "Class I": 0, "Class J": 0, "Class K": 0, "Class L": 0
+        };
+        await update(ref(db, 'auction/bids'), resets);
+        await update(auctionRef, { status: 'standby', itemName: '等待下一輪開拍...' });
+        document.getElementById('itemName').value = '';
+      }
+    });
+
+    // 讓關主在後台也能看到目前誰最高分
+    onValue(auctionRef, (snapshot) => {
+      const data = snapshot.val();
+      if(!data || !data.bids) return;
+      const arr = Object.keys(data.bids).map(k => ({name: k, val: data.bids[k]}));
+      arr.sort((a,b) => b.val - a.val);
+      const top6 = arr.slice(0, 6).filter(x => x.val > 0);
+      
+      document.getElementById('liveStatus').innerHTML = top6.map((x, i) => 
+        `<div>${i+1}. ${x.name} - 💰 ${x.val}</div>`
+      ).join('') || "目前尚無人出價";
+    });
+  </script>
+</body>
+</html>
